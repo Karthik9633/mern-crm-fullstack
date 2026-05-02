@@ -4,27 +4,48 @@ import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
   const nav = useNavigate();
 
   const handleSubmit = async () => {
-    const res = await API.post("/auth/login", form);
-    localStorage.setItem("token", res.data.token);
-    nav("/dashboard");
+    if (!form.email || !form.password) {
+      setError("Email and password required");
+      return;
+    }
+
+    try {
+      const res = await API.post("/auth/login", form);
+      localStorage.setItem("token", res.data.token);
+      nav("/dashboard");
+    } catch (err) {
+      setError("Invalid credentials");
+    }
   };
 
   return (
-    <div className="p-5 max-w-md mx-auto">
-      <h2 className="text-xl mb-3">Login</h2>
+    <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-100 to-indigo-200">
+      <div className="bg-white p-6 rounded-xl shadow-xl w-96">
+        <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
 
-      <input className="border p-2 w-full mb-2" placeholder="Email"
-        onChange={(e)=>setForm({...form,email:e.target.value})} />
+        {error && (
+          <p className="text-red-500 mb-2 text-sm">{error}</p>
+        )}
 
-      <input type="password" className="border p-2 w-full mb-2" placeholder="Password"
-        onChange={(e)=>setForm({...form,password:e.target.value})} />
+        <input className="border p-2 w-full mb-2 rounded"
+          placeholder="Email"
+          onChange={(e)=>setForm({...form,email:e.target.value})} />
 
-      <button onClick={handleSubmit} className="bg-green-600 text-white p-2 w-full">
-        Login
-      </button>
+        <input type="password"
+          className="border p-2 w-full mb-3 rounded"
+          placeholder="Password"
+          onChange={(e)=>setForm({...form,password:e.target.value})} />
+
+        <button
+          onClick={handleSubmit}
+          className="bg-green-600 text-white w-full p-2 rounded hover:bg-green-700">
+          Login
+        </button>
+      </div>
     </div>
   );
 }
